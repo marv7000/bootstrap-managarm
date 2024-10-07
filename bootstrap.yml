@@ -1471,6 +1471,49 @@ packages:
           DESTDIR: '@THIS_COLLECT_DIR@'
         quiet: true
 
+  - name: managarm-kernel-uefi
+    metadata:
+      summary: The Managarm kernel for UEFI
+      description: This package provides the Managarm kernel.
+      spdx: 'MIT'
+      website: 'https://managarm.org'
+      maintainer: "Alexander van der Grinten <avdgrinten@managarm.org>"
+      categories: ['sys-kernel']
+    architecture: '@OPTION:arch@'
+    default: true
+    from_source: managarm
+    tools_required:
+      - host-llvm-toolchain
+      - host-managarm-tools
+      - host-pkg-config
+      - virtual: pkgconfig-for-target
+        triple: "@OPTION:arch-triple@"
+    pkgs_required:
+      - frigg
+      - mlibc-headers
+    configure:
+      - args: |
+          sed -e 's|_BUILD_ROOT_|@BUILD_ROOT@|' @SOURCE_ROOT@/scripts/meson-kernel-uefi-@OPTION:arch-triple@.cross-file \
+              > ./meson-custom.cross-file
+      - args:
+        - 'meson'
+        - '--cross-file=@SOURCE_ROOT@/scripts/meson-kernel-common.cross-file'
+        - '--cross-file=./meson-custom.cross-file'
+        - '--prefix=/usr/managarm'
+        - '--libdir=lib'
+        - '--buildtype=debugoptimized'
+        - '--wrap-mode=nofallback'
+        - '--force-fallback-for=freestnd-c-hdrs,freestnd-cxx-hdrs'
+        - '-Dbuild_uefi=true'
+        - '@THIS_SOURCE_DIR@'
+        isolate_network: false
+    build:
+      - args: ['ninja']
+      - args: ['ninja', 'install']
+        environ:
+          DESTDIR: '@THIS_COLLECT_DIR@'
+        quiet: true
+
   - name: managarm-system
     metadata:
       summary: The Managarm userspace
