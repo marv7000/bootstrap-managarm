@@ -59,3 +59,57 @@ packages:
         environ:
           DESTDIR: '@THIS_COLLECT_DIR@'
       - args: ['cp', '@SOURCE_ROOT@/extrafiles/sway-config', '@THIS_COLLECT_DIR@/etc/sway/config']
+
+  - name: labwc
+    architecture: '@OPTION:arch@'
+    metadata:
+      summary: A Wayland window-stacking compositor
+      description: Labwc is a wlroots-based window-stacking compositor for Wayland, inspired by Openbox.
+      spdx: GPL-2.0
+      website: 'https://github.com/labwc/labwc'
+      maintainer: "Marvin Friedrich <contact@marvinf.com>"
+      categories: ['gui-wm']
+    source:
+      subdir: 'ports'
+      git: 'https://github.com/labwc/labwc'
+      tag: '0.9.2'
+      version: '0.9.2'
+    tools_required:
+      - system-gcc
+      - host-libtool
+      - wayland-scanner
+      - host-cmake
+      - host-pkg-config
+      - virtual: pkgconfig-for-target
+        triple: "@OPTION:arch-triple@"
+      - virtual: pkgconfig-for-host
+        program_name: host-pkg-config
+    pkgs_required:
+      - mlibc
+      - glib
+      - cairo
+      - pango
+      - libsfdo
+      - wayland
+      - wayland-protocols
+      - wlroots
+      - xwayland
+    revision: 1
+    configure:
+      - args:
+        - 'meson'
+        - 'setup'
+        - '--native-file'
+        - '@SOURCE_ROOT@/scripts/meson.native-file'
+        - '--cross-file'
+        - '@SOURCE_ROOT@/scripts/meson-@OPTION:arch-triple@.cross-file'
+        - '--prefix=/usr'
+        - '--libdir=lib'
+        - '--buildtype=debugoptimized'
+        - '@THIS_SOURCE_DIR@'
+    build:
+      - args: ['ninja']
+      - args: ['ninja', 'install']
+        environ:
+          DESTDIR: '@THIS_COLLECT_DIR@'
+      # - args: ['cp', '@SOURCE_ROOT@/extrafiles/sway-config', '@THIS_COLLECT_DIR@/etc/sway/config']

@@ -471,8 +471,8 @@ packages:
     source:
       subdir: 'ports'
       git: 'https://gitlab.freedesktop.org/wlroots/wlroots/'
-      tag: '0.18.2'
-      version: '0.18.2'
+      tag: '0.19.2'
+      version: '0.19.2'
     tools_required:
       - system-gcc
       - host-libtool
@@ -561,6 +561,47 @@ packages:
         - '--libdir=lib'
         - '--buildtype=debugoptimized'
         - '-Dbuild_docs=false'
+        - '@THIS_SOURCE_DIR@'
+    build:
+      - args: ['ninja']
+      - args: ['ninja', 'install']
+        environ:
+          DESTDIR: '@THIS_COLLECT_DIR@'
+
+  - name: libsfdo
+    architecture: '@OPTION:arch@'
+    metadata:
+      summary: A collection of libraries which implement some of the freedesktop.org specifications.
+      description: The wpebackend-fdo package contains the Freedesktop.org backend for WPE WebKit and the WPE renderer.
+      spdx: 'BSD-2-Clause'
+      website: 'https://gitlab.freedesktop.org/vyivel/libsfdo'
+      maintainer: "Marvin Friedrich <contact@marvinf.com>"
+      categories: ['gui-libs']
+    source:
+      subdir: 'ports'
+      git: 'https://gitlab.freedesktop.org/vyivel/libsfdo.git'
+      tag: 'v0.1.4'
+      version: '0.1.4'
+    tools_required:
+      - system-gcc
+      - host-pkg-config
+      - virtual: pkgconfig-for-target
+        triple: "@OPTION:arch-triple@"
+      - wayland-scanner
+    pkgs_required:
+      - mlibc
+    revision: 3
+    configure:
+      - args:
+        - 'meson'
+        - 'setup'
+        - '--cross-file'
+        - '@SOURCE_ROOT@/scripts/meson-@OPTION:arch-triple@.cross-file'
+        - '--prefix=/usr'
+        - '--libdir=lib'
+        - '--buildtype=debugoptimized'
+        - '-Dexamples=false'
+        - '-Dtests=false'
         - '@THIS_SOURCE_DIR@'
     build:
       - args: ['ninja']
