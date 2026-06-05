@@ -56,3 +56,191 @@ packages:
       - args: ['make', 'DESTDIR=@THIS_COLLECT_DIR@', 'install']
         environ:
           DESTDIR: '@THIS_COLLECT_DIR@'
+
+  - name: firefox
+    architecture: '@OPTION:arch@'
+    labels: [aarch64, riscv64]
+    metadata:
+      summary: Mozilla Firefox web browser
+      description: The Firefox web browser, ported to managarm.
+      spdx: 'MPL-2.0'
+      website: 'https://www.mozilla.org/firefox/'
+      maintainer: "The Managarm Project <info@managarm.org>"
+      categories: ['www-client']
+    source:
+      subdir: 'ports'
+      url: 'https://archive.mozilla.org/pub/firefox/releases/150.0/source/firefox-150.0.source.tar.xz'
+      format: 'tar.xz'
+      checksum: blake2b:046ed34f4ccdeab26420bb394621887293791fe67a45b548819baaad1f93f72d675d461c9c0a9f3d88cc3ae9cd33a9d614904748b3ac70ad900f933013c397eb
+      extract_path: 'firefox-150.0'
+      version: '150.0'
+      patch-path-strip: 1
+    sources_required:
+      - rust-patched-libs
+    tools_required:
+      - system-gcc
+      - host-llvm-toolchain
+      - host-rust
+      - host-cargo
+      - host-cbindgen
+      - host-nodejs
+      - host-pkg-config
+      - virtual: pkgconfig-for-target
+        triple: '@OPTION:arch-triple@'
+    pkgs_required:
+      - mlibc
+      - nspr
+      - gtk+-3
+      - gdk-pixbuf
+      - cairo
+      - pango
+      - fontconfig
+      - freetype
+      - harfbuzz
+      - pixman
+      - glib
+      - atk
+      - at-spi2-core
+      - dbus
+      - libffi
+      - libx11
+      - libxcb
+      - libxext
+      - libxfixes
+      - libxrandr
+      - libxrender
+      - libxcomposite
+      - libxdamage
+      - libxt
+      - libxtst
+      - wayland
+      - mesa
+      - libdrm
+      - libxkbcommon
+      - icu
+      - zlib
+      - libpng
+      - libjpeg-turbo
+      - libvpx
+      - libwebp
+      - libaom
+      - libogg
+      - libvorbis
+      - libtheora
+      - alsa-lib
+      - libpulse
+      - openssl
+    revision: 1
+    configure:
+      - args: |
+          cat << 'EOF' > @THIS_BUILD_DIR@/mozconfig
+          mk_add_options MOZ_OBJDIR=@THIS_BUILD_DIR@/obj
+
+          ac_add_options --target=@OPTION:rust-arch@-unknown-managarm-mlibc
+          ac_add_options --host=x86_64-pc-linux-gnu
+          ac_add_options --enable-application=browser
+          ac_add_options --prefix=/usr
+          ac_add_options --enable-default-toolkit=cairo-gtk3
+          ac_add_options --with-system-nspr
+
+          CC="@OPTION:arch-triple@-gcc"
+          CXX="@OPTION:arch-triple@-g++"
+          AR="@OPTION:arch-triple@-ar"
+          NM="@OPTION:arch-triple@-nm"
+          RANLIB="@OPTION:arch-triple@-ranlib"
+          HOST_CC="gcc"
+          HOST_CXX="g++"
+          export PKG_CONFIG="@OPTION:arch-triple@-pkg-config"
+
+          ac_add_options --with-libclang-path=@BUILD_ROOT@/tools/host-llvm-toolchain/lib
+          ac_add_options --with-clang-path=@BUILD_ROOT@/tools/host-llvm-toolchain/bin/clang
+          export LIBCLANG_PATH="@BUILD_ROOT@/tools/host-llvm-toolchain/lib"
+          export BINDGEN_CFLAGS="-target @OPTION:arch-triple@ --gcc-toolchain=@BUILD_ROOT@/tools/system-gcc"
+
+          export RUSTC="@BUILD_ROOT@/tools/host-rust/bin/rustc"
+          export CARGO="@BUILD_ROOT@/tools/host-cargo/bin/cargo"
+          export CBINDGEN="@BUILD_ROOT@/tools/host-cbindgen/bin/cbindgen"
+          export NODEJS="@BUILD_ROOT@/tools/host-nodejs/bin/node"
+
+          ac_add_options --disable-crashreporter
+          ac_add_options --disable-sandbox
+          ac_add_options --disable-updater
+          ac_add_options --disable-webrtc
+          ac_add_options --disable-tests
+          ac_add_options --disable-debug
+          ac_add_options --enable-release
+          ac_add_options --disable-jemalloc
+          ac_add_options --without-wasm-sandboxed-libraries
+          ac_add_options --disable-default-browser-agent
+
+          # TODO: mlibc rejects non-standard DT_* values
+          ac_add_options --disable-elf-hack
+          EOF
+      - args: |
+          mkdir -p @THIS_BUILD_DIR@/cargo-home
+          cat << 'EOF' > @THIS_BUILD_DIR@/cargo-home/config.toml
+          [target.@OPTION:rust-arch@-unknown-managarm-mlibc]
+          linker = "@OPTION:arch-triple@-gcc"
+
+          [patch.crates-io]
+          calloop = { path = "@SOURCE_ROOT@/ports/rust-calloop" }
+          libc = { path = "@SOURCE_ROOT@/ports/rust-libc" }
+          libloading-07 = { path = "@SOURCE_ROOT@/ports/rust-libloading-0.7", package = "libloading" }
+          libloading-08 = { path = "@SOURCE_ROOT@/ports/rust-libloading-0.8", package = "libloading" }
+          num_cpus = { path = "@SOURCE_ROOT@/ports/rust-num-cpus" }
+          users = { path = "@SOURCE_ROOT@/ports/rust-users" }
+          winit = { path = "@SOURCE_ROOT@/ports/rust-winit" }
+          errno = { path = "@SOURCE_ROOT@/ports/rust-errno" }
+          glutin = { path = "@SOURCE_ROOT@/ports/rust-glutin/glutin" }
+          glutin_egl_sys = { path = "@SOURCE_ROOT@/ports/rust-glutin/glutin_egl_sys" }
+          glutin_glx_sys = { path = "@SOURCE_ROOT@/ports/rust-glutin/glutin_glx_sys" }
+          shared_library = { path = "@SOURCE_ROOT@/ports/rust-shared-library" }
+          getrandom-03 = { path = "@SOURCE_ROOT@/ports/rust-getrandom-0.3", package = "getrandom" }
+          rustix-038 = { path = "@SOURCE_ROOT@/ports/rust-rustix-0.38", package = "rustix" }
+          rustix-10 = { path = "@SOURCE_ROOT@/ports/rust-rustix-1.0", package = "rustix" }
+          uzers = { path = "@SOURCE_ROOT@/ports/rust-uzers", package = "uzers" }
+          cc = { path = "@SOURCE_ROOT@/ports/rust-cc", package = "cc" }
+          termios = { path = "@SOURCE_ROOT@/ports/rust-termios", package = "termios" }
+          mac_address = { path = "@SOURCE_ROOT@/ports/rust-mac-address", package = "mac_address" }
+          lua-src = { path = "@SOURCE_ROOT@/ports/rust-lua-src", package = "lua-src" }
+          starship-battery = { path = "@SOURCE_ROOT@/ports/rust-starship-battery" }
+          socket2 = { path = "@SOURCE_ROOT@/ports/rust-socket2" }
+          libssh-rs-sys = { path = "@SOURCE_ROOT@/ports/rust-libssh-rs-sys/libssh-rs-sys" }
+          wayland-backend = { path = "@SOURCE_ROOT@/ports/rust-wayland-backend/wayland-backend" }
+          wayland-sys = { path = "@SOURCE_ROOT@/ports/rust-wayland-backend/wayland-sys" }
+          ring = { path = "@SOURCE_ROOT@/ports/rust-ring" }
+          zbus = { path = "@SOURCE_ROOT@/ports/rust-zbus/zbus" }
+          zvariant = { path = "@SOURCE_ROOT@/ports/rust-zbus/zvariant" }
+          target-lexicon = { path = "@SOURCE_ROOT@/ports/rust-target-lexicon" }
+          EOF
+      - args: ['/usr/bin/python3', '@THIS_SOURCE_DIR@/mach', 'configure']
+        cargo_home: false
+        environ:
+          MOZCONFIG: '@THIS_BUILD_DIR@/mozconfig'
+          MOZBUILD_STATE_PATH: '@THIS_BUILD_DIR@/mozbuild'
+          MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE: 'none'
+          PYTHONDONTWRITEBYTECODE: '1'
+          CARGO_HOME: '@THIS_BUILD_DIR@/cargo-home'
+    build:
+      - args: ['/usr/bin/python3', '@THIS_SOURCE_DIR@/mach', 'build', '-j@PARALLELISM@']
+        cargo_home: false
+        environ:
+          MOZCONFIG: '@THIS_BUILD_DIR@/mozconfig'
+          MOZBUILD_STATE_PATH: '@THIS_BUILD_DIR@/mozbuild'
+          MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE: 'none'
+          PYTHONDONTWRITEBYTECODE: '1'
+          CARGO_HOME: '@THIS_BUILD_DIR@/cargo-home'
+      - args: ['/usr/bin/python3', '@THIS_SOURCE_DIR@/mach', 'package']
+        cargo_home: false
+        environ:
+          MOZCONFIG: '@THIS_BUILD_DIR@/mozconfig'
+          MOZBUILD_STATE_PATH: '@THIS_BUILD_DIR@/mozbuild'
+          MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE: 'none'
+          PYTHONDONTWRITEBYTECODE: '1'
+          CARGO_HOME: '@THIS_BUILD_DIR@/cargo-home'
+      - args: |
+          set -e
+          install -d "@THIS_COLLECT_DIR@/usr/lib"
+          cp -a "@THIS_BUILD_DIR@/obj/dist/firefox" "@THIS_COLLECT_DIR@/usr/lib/firefox"
+          install -d "@THIS_COLLECT_DIR@/usr/bin"
+          ln -s ../lib/firefox/firefox "@THIS_COLLECT_DIR@/usr/bin/firefox"

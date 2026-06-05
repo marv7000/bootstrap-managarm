@@ -1,7 +1,7 @@
-From 33b5cda53d92894a67b0ddc62c3ebefe3a90a1d4 Mon Sep 17 00:00:00 2001
+From c8ffdd9933c5fbc7ee41cd5769b3b7af8ab61da9 Mon Sep 17 00:00:00 2001
 From: no92 <no92.mail@gmail.com>
-Date: Mon, 12 Feb 2024 00:32:53 +0100
-Subject: [PATCH 2/4] Add managarm support
+Date: Thu, 4 Jun 2026 11:13:57 +0200
+Subject: [PATCH 2/5] Add managarm support
 
 ---
  Cargo.toml                                  |   3 +
@@ -11,42 +11,42 @@ Subject: [PATCH 2/4] Add managarm support
  src/unix/linux_like/managarm/x86_64/mod.rs  | 124 ++++++++++++++++++++
  src/unix/linux_like/mod.rs                  |   7 +-
  src/unix/mod.rs                             |   3 +-
- triagebot.toml                              |   2 +
- 8 files changed, 332 insertions(+), 4 deletions(-)
+ triagebot.toml                              |   1 +
+ 8 files changed, 331 insertions(+), 4 deletions(-)
  create mode 100644 src/unix/linux_like/managarm/aarch64/mod.rs
  create mode 100644 src/unix/linux_like/managarm/riscv64/mod.rs
  create mode 100644 src/unix/linux_like/managarm/x86_64/mod.rs
 
 diff --git a/Cargo.toml b/Cargo.toml
-index f49c45986..9752c50ce 100644
+index fe67351..21df647 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
 @@ -24,6 +24,7 @@ targets = [
-     "aarch64-unknown-hermit",
-     "aarch64-unknown-linux-gnu",
-     "aarch64-unknown-linux-musl",
+     "i686-pc-windows-msvc",
+     "i686-unknown-linux-gnu",
+     "x86_64-pc-windows-gnu",
 +    "aarch64-unknown-managarm-mlibc",
-     "aarch64-unknown-netbsd",
-     "aarch64-unknown-openbsd",
-     "aarch64-wrs-vxworks",
-@@ -87,6 +88,7 @@ targets = [
-     "riscv64gc-unknown-hermit",
-     "riscv64gc-unknown-linux-gnu",
-     "riscv64gc-unknown-linux-musl",
-+    "riscv64gc-unknown-managarm-mlibc",
-     "riscv64gc-unknown-none-elf",
-     "riscv64imac-unknown-none-elf",
-     "riscv64-wrs-vxworks",
-@@ -121,6 +123,7 @@ targets = [
+     "x86_64-pc-windows-msvc",
      "x86_64-unknown-linux-gnu",
+     #
+@@ -87,6 +88,7 @@ targets = [
+     "x86_64-linux-android",
+     "x86_64-unknown-fuchsia",
      "x86_64-unknown-linux-gnux32",
-     "x86_64-unknown-linux-musl",
-+    "x86_64-unknown-managarm-mlibc",
-     "x86_64-unknown-netbsd",
-     "x86_64-unknown-openbsd",
++    "riscv64gc-unknown-managarm-mlibc",
      "x86_64-unknown-redox",
+     #
+     # Tier 3 targets that are distinct enough to be useful, or have historically
+@@ -121,6 +123,7 @@ targets = [
+     "mipsel-sony-psp",
+     "mipsel-unknown-linux-gnu",
+     "mipsel-unknown-linux-musl",
++    "x86_64-unknown-managarm-mlibc",
+     "powerpc-unknown-linux-gnuspe",
+     "powerpc-unknown-netbsd",
+     "powerpc-wrs-vxworks",
 diff --git a/build.rs b/build.rs
-index 199a9ac42..755523511 100644
+index 5eb2de3..17f9486 100644
 --- a/build.rs
 +++ b/build.rs
 @@ -38,12 +38,20 @@ const CHECK_CFG_EXTRA: &[(&str, &[&str])] = &[
@@ -74,7 +74,7 @@ index 199a9ac42..755523511 100644
          "target_arch",
 diff --git a/src/unix/linux_like/managarm/aarch64/mod.rs b/src/unix/linux_like/managarm/aarch64/mod.rs
 new file mode 100644
-index 000000000..b92632cb7
+index 0000000..b92632c
 --- /dev/null
 +++ b/src/unix/linux_like/managarm/aarch64/mod.rs
 @@ -0,0 +1,81 @@
@@ -161,7 +161,7 @@ index 000000000..b92632cb7
 +pub const O_LARGEFILE: c_int = 0x20000;
 diff --git a/src/unix/linux_like/managarm/riscv64/mod.rs b/src/unix/linux_like/managarm/riscv64/mod.rs
 new file mode 100644
-index 000000000..ee31b8edb
+index 0000000..ee31b8e
 --- /dev/null
 +++ b/src/unix/linux_like/managarm/riscv64/mod.rs
 @@ -0,0 +1,104 @@
@@ -271,7 +271,7 @@ index 000000000..ee31b8edb
 +pub const O_NOFOLLOW: c_int = 0x20000;
 diff --git a/src/unix/linux_like/managarm/x86_64/mod.rs b/src/unix/linux_like/managarm/x86_64/mod.rs
 new file mode 100644
-index 000000000..4fa64623d
+index 0000000..4fa6462
 --- /dev/null
 +++ b/src/unix/linux_like/managarm/x86_64/mod.rs
 @@ -0,0 +1,124 @@
@@ -400,7 +400,7 @@ index 000000000..4fa64623d
 +pub const O_DIRECTORY: c_int = 0x10000;
 +pub const O_NOFOLLOW: c_int = 0x20000;
 diff --git a/src/unix/linux_like/mod.rs b/src/unix/linux_like/mod.rs
-index 3ded4da44..95800ca6d 100644
+index 3ded4da..95800ca 100644
 --- a/src/unix/linux_like/mod.rs
 +++ b/src/unix/linux_like/mod.rs
 @@ -258,6 +258,7 @@ cfg_if! {
@@ -432,10 +432,10 @@ index 3ded4da44..95800ca6d 100644
          // Unknown target_os
      }
 diff --git a/src/unix/mod.rs b/src/unix/mod.rs
-index 227334a9d..13a7e2be5 100644
+index 5f23744..25150f8 100644
 --- a/src/unix/mod.rs
 +++ b/src/unix/mod.rs
-@@ -2371,7 +2371,8 @@ cfg_if! {
+@@ -2449,7 +2449,8 @@ cfg_if! {
          target_os = "linux",
          target_os = "l4re",
          target_os = "android",
@@ -446,25 +446,14 @@ index 227334a9d..13a7e2be5 100644
          mod linux_like;
          pub use self::linux_like::*;
 diff --git a/triagebot.toml b/triagebot.toml
-index f01074c5e..7e0a6d9f6 100644
+index c192178..4d5a68d 100644
 --- a/triagebot.toml
 +++ b/triagebot.toml
-@@ -131,6 +131,7 @@ trigger_files = [
-     "src/unix/linux_like/linux/gnu/b64/riscv64",
-     "src/unix/linux_like/linux/musl/b32/riscv32",
-     "src/unix/linux_like/linux/musl/b64/riscv64",
+@@ -131,3 +131,4 @@ cc = ["@jclulow", "@pfmooney"]
+ [mentions."*android*"]
+ message = "Some changes occurred in an Android module"
+ cc = ["@maurer"]
 +    "src/unix/linux_like/managarm/riscv64",
-     "src/vxworks/riscv32.rs",
-     "src/vxworks/riscv64.rs",
- ]
-@@ -178,6 +179,7 @@ trigger_files = [
-     "src/unix/linux_like/linux/musl/b32/x86",
-     "src/unix/linux_like/linux/musl/b64/x86_64",
-     "src/unix/linux_like/linux/uclibc/x86_64",
-+    "src/unix/linux_like/managarm/x86_64",
-     "src/unix/nto/x86_64.rs",
-     "src/unix/solarish/x86.rs",
-     "src/unix/solarish/x86_64.rs",
 -- 
-2.52.0
+2.54.0
 

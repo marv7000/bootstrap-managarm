@@ -89,6 +89,41 @@ tools:
         - '@PREFIX@'
         isolate_network: false
 
+  - name: host-cbindgen
+    architecture: noarch
+    labels: [aarch64, riscv64]
+    source:
+      subdir: 'ports'
+      git: 'https://github.com/mozilla/cbindgen.git'
+      tag: 'v0.29.1'
+      version: '0.29.1'
+    tools_required:
+      - tool: host-rust
+        recursive: true
+      - tool: system-gcc # GCC is used for linking
+        recursive: true
+      - host-cargo
+    sources_required:
+      # This cargo runs on the host, so we don't actually need any patches here. We just
+      # add the sources used by cargo so that the dependency resolver doesn't complain.
+      - rust-patched-libs
+    revision: 1
+    compile:
+      - args:
+        - 'cargo'
+        - 'install'
+        - '--locked'
+        - '--target'
+        - 'x86_64-unknown-linux-gnu'
+        - '--target-dir'
+        - '@THIS_BUILD_DIR@'
+        - '--path'
+        - '@THIS_SOURCE_DIR@'
+        - '-j@PARALLELISM@'
+        - '--root'
+        - '@PREFIX@'
+        isolate_network: false
+
   - name: host-lxqt-build-tools
     architecture: noarch
     source:

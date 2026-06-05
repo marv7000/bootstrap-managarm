@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: The Managarm Project <info@managarm.org>
+Date: Thu, 5 Jun 2026 00:00:00 +0200
+Subject: [PATCH] build: let cargo refresh the lockfile offline for managarm patches
+
+The injected [patch.crates-io] for managarm's crate ports changes resolution,
+so use --offline instead of --frozen to allow an offline lockfile update.
+---
+--- a/build/RunCbindgen.py
++++ b/build/RunCbindgen.py
+@@ -55,7 +55,7 @@
+     # within a tree, the Rust dependencies have been vendored in so Cargo won't
+     # touch the lock file.
+     if not buildconfig.substs.get("JS_STANDALONE"):
+-        args.append("--frozen")
++        args.append("--offline")
+ 
+     stdout, returncode = _run_process(args)
+ 
+--- a/config/makefiles/rust.mk
++++ b/config/makefiles/rust.mk
+@@ -24,7 +24,7 @@
+ # within a tree, the Rust dependencies have been vendored in so Cargo won't
+ # touch the lock file.
+ ifndef JS_STANDALONE
+-cargo_build_flags += --frozen
++cargo_build_flags += --offline
+ endif
+ 
+ cargo_build_flags += --manifest-path $(CARGO_FILE)

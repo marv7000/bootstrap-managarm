@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: The Managarm Project <info@managarm.org>
+Date: Thu, 5 Jun 2026 00:00:00 +0200
+Subject: [PATCH] build: detect the managarm kernel in the compiler probe
+
+managarm gcc defines __managarm__ but not __linux__; accept it as the Linux
+kernel in the preprocessor probe.
+---
+--- a/python/mozbuild/mozbuild/configure/constants.py
++++ b/python/mozbuild/mozbuild/configure/constants.py
+@@ -141,7 +141,7 @@
+     "DragonFly": "__DragonFly__",
+     "FreeBSD": "__FreeBSD__",
+     "kFreeBSD": "__FreeBSD_kernel__",
+-    "Linux": "__linux__",
++    "Linux": "__linux__ || __managarm__",
+     "NetBSD": "__NetBSD__",
+     "OpenBSD": "__OpenBSD__",
+     "SunOS": "__sun__",

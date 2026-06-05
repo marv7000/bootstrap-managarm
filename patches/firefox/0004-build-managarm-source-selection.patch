@@ -1,0 +1,125 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: The Managarm Project <info@managarm.org>
+Date: Thu, 5 Jun 2026 00:00:00 +0200
+Subject: [PATCH] build: managarm build-system adjustments
+
+Select the managarm-compatible source files and disable features that rely on
+Linux-only facilities (breakpad ELF reader, midir, rtkit, raw-syscall RAPL,
+signal-based profiler) for the initial port.
+---
+--- a/config/system-headers.mozbuild
++++ b/config/system-headers.mozbuild
+@@ -862,7 +862,6 @@
+     "sys/shm.h",
+     "sys/siginfo.h",
+     "sys/signal.h",
+-    "sys/single_threaded.h",
+     "sys/socket.h",
+     "sys/sockio.h",
+     "sys/sparc/frame.h",
+--- a/dom/media/moz.build
++++ b/dom/media/moz.build
+@@ -336,7 +336,7 @@
+     "XiphExtradata.cpp",
+ ]
+ 
+-if CONFIG["OS_TARGET"] == "Linux":
++if CONFIG["OS_TARGET"] == "Linux" and CONFIG["TARGET_RAW_OS"] != "managarm-mlibc":
+     UNIFIED_SOURCES += ["UnderrunHandlerLinux.cpp"]
+ else:
+     UNIFIED_SOURCES += ["UnderrunHandlerNoop.cpp"]
+--- a/ipc/chromium/src/third_party/moz.build
++++ b/ipc/chromium/src/third_party/moz.build
+@@ -55,7 +55,7 @@
+     UNIFIED_SOURCES += [
+         'libevent/epoll.c',
+     ]
+-    if CONFIG['OS_TARGET'] != 'Android':
++    if CONFIG['OS_TARGET'] != 'Android' and CONFIG["TARGET_RAW_OS"] != "managarm-mlibc":
+         UNIFIED_SOURCES += [
+             'libevent/epoll_sub.c',
+         ]
+--- a/media/ffvpx/ffvpxcommon.mozbuild
++++ b/media/ffvpx/ffvpxcommon.mozbuild
+@@ -52,6 +52,7 @@
+     CFLAGS += [
+         '-Wno-discarded-qualifiers',
+         '-Wno-maybe-uninitialized',
++        '-Wno-incompatible-pointer-types',
+     ]
+ if CONFIG['CC_TYPE'] in ('clang', 'gcc'):
+     # Force visibility of cpu and av_log symbols.
+--- a/mozglue/baseprofiler/moz.build
++++ b/mozglue/baseprofiler/moz.build
+@@ -28,7 +28,11 @@
+     ]
+ 
+     # Keep in sync with ProfilerPlatformMacros.h
+-    if (
++    if CONFIG["TARGET_RAW_OS"] == "managarm-mlibc":
++        SOURCES += [
++            "core/shared-libraries-noop.cc",
++        ]
++    elif (
+         (
+             CONFIG["OS_TARGET"] == "Android"
+             and CONFIG["TARGET_CPU"] in ("aarch64", "arm", "x86", "x86_64")
+--- a/toolkit/moz.configure
++++ b/toolkit/moz.configure
+@@ -192,6 +192,8 @@
+     # MozDescribeCodeAddress to call into some Rust crates that parse ELF and
+     # DWARF data, but build system issues currently prevent Rust from being
+     # used in mozglue.)
++    if "managarm" in target.raw_os:
++        return False
+     if target.kernel == "Linux" or target.kernel == "FreeBSD":
+         return True
+ 
+@@ -243,7 +245,10 @@
+ @depends(target)
+ def midir_linux_support(target):
+     return (
+-        target.kernel == "Linux" and target.os != "Android" and target.cpu != "riscv64"
++        target.kernel == "Linux"
++        and target.os != "Android"
++        and target.cpu != "riscv64"
++        and "managarm" not in target.raw_os
+     )
+ 
+ 
+--- a/tools/power/moz.build
++++ b/tools/power/moz.build
+@@ -10,6 +10,7 @@
+ if (
+     CONFIG["OS_ARCH"] == "Linux"
+     and CONFIG["OS_TARGET"] != "Android"
++    and CONFIG["TARGET_RAW_OS"] != "managarm-mlibc"
+     and CONFIG["TARGET_CPU"] in ("x86", "x86_64")
+ ):
+     do_rapl = True
+--- a/tools/profiler/moz.build
++++ b/tools/profiler/moz.build
+@@ -81,12 +81,17 @@
+             SOURCES += [
+                 "/toolkit/crashreporter/google-breakpad/src/common/linux/breakpad_getcontext.S"
+             ]
+-elif CONFIG["OS_TARGET"] == "Linux" and CONFIG["TARGET_CPU"] in (
+-    "aarch64",
+-    "arm",
+-    "x86",
+-    "x86_64",
+-    "mips64",
++elif (
++    CONFIG["OS_TARGET"] == "Linux"
++    and CONFIG["TARGET_RAW_OS"] != "managarm-mlibc"
++    and CONFIG["TARGET_CPU"]
++    in (
++        "aarch64",
++        "arm",
++        "x86",
++        "x86_64",
++        "mips64",
++    )
+ ):
+     UNIFIED_SOURCES += [
+         "core/ProfilerCPUFreq-linux-android.cpp",

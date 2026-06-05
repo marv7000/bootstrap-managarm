@@ -1,7 +1,7 @@
-From c4c04af034ecbca4d3d46cae0e65de2f970b0962 Mon Sep 17 00:00:00 2001
+From 009faf5049bce63afd6853f14902d5ae696c120d Mon Sep 17 00:00:00 2001
 From: no92 <no92.mail@gmail.com>
-Date: Fri, 9 Jan 2026 11:39:38 +0100
-Subject: [PATCH 4/4] Add mlibc bindings
+Date: Thu, 4 Jun 2026 11:13:57 +0200
+Subject: [PATCH 4/5] Add mlibc bindings
 
 ---
  src/new/common/linux_like/mod.rs     |  3 +-
@@ -19,7 +19,7 @@ Subject: [PATCH 4/4] Add mlibc bindings
  create mode 100644 src/new/mlibc/unistd.rs
 
 diff --git a/src/new/common/linux_like/mod.rs b/src/new/common/linux_like/mod.rs
-index 9c41fe256..76aa6256d 100644
+index 9c41fe2..76aa625 100644
 --- a/src/new/common/linux_like/mod.rs
 +++ b/src/new/common/linux_like/mod.rs
 @@ -4,6 +4,7 @@
@@ -32,7 +32,7 @@ index 9c41fe256..76aa6256d 100644
  ))]
  pub(crate) mod pthread;
 diff --git a/src/new/common/linux_like/pthread.rs b/src/new/common/linux_like/pthread.rs
-index b54d385f9..dd2eb3665 100644
+index b54d385..dd2eb36 100644
 --- a/src/new/common/linux_like/pthread.rs
 +++ b/src/new/common/linux_like/pthread.rs
 @@ -1,7 +1,7 @@
@@ -65,7 +65,7 @@ index b54d385f9..dd2eb3665 100644
      pub fn pthread_setname_np(thread: crate::pthread_t, name: *const c_char) -> c_int;
  }
 diff --git a/src/new/common/mod.rs b/src/new/common/mod.rs
-index acb18917c..027b3d94a 100644
+index acb1891..027b3d9 100644
 --- a/src/new/common/mod.rs
 +++ b/src/new/common/mod.rs
 @@ -23,6 +23,7 @@ pub(crate) mod bsd;
@@ -77,7 +77,7 @@ index acb18917c..027b3d94a 100644
  pub(crate) mod linux_like;
  
 diff --git a/src/new/common/posix/mod.rs b/src/new/common/posix/mod.rs
-index 44ae64a98..10b4c0856 100644
+index 44ae64a..10b4c08 100644
 --- a/src/new/common/posix/mod.rs
 +++ b/src/new/common/posix/mod.rs
 @@ -8,6 +8,7 @@
@@ -89,7 +89,7 @@ index 44ae64a98..10b4c0856 100644
      target_vendor = "apple",
  ))]
 diff --git a/src/new/common/posix/pthread.rs b/src/new/common/posix/pthread.rs
-index 146cd6042..83e4d42d3 100644
+index 146cd60..83e4d42 100644
 --- a/src/new/common/posix/pthread.rs
 +++ b/src/new/common/posix/pthread.rs
 @@ -5,14 +5,14 @@
@@ -408,7 +408,7 @@ index 146cd6042..83e4d42d3 100644
  }
 diff --git a/src/new/mlibc/mod.rs b/src/new/mlibc/mod.rs
 new file mode 100644
-index 000000000..99664b12f
+index 0000000..99664b1
 --- /dev/null
 +++ b/src/new/mlibc/mod.rs
 @@ -0,0 +1,2 @@
@@ -416,7 +416,7 @@ index 000000000..99664b12f
 +pub(crate) mod unistd;
 diff --git a/src/new/mlibc/pthread.rs b/src/new/mlibc/pthread.rs
 new file mode 100644
-index 000000000..df519fabd
+index 0000000..df519fa
 --- /dev/null
 +++ b/src/new/mlibc/pthread.rs
 @@ -0,0 +1,56 @@
@@ -478,7 +478,7 @@ index 000000000..df519fabd
 +};
 diff --git a/src/new/mlibc/unistd.rs b/src/new/mlibc/unistd.rs
 new file mode 100644
-index 000000000..8d55ee582
+index 0000000..8d55ee5
 --- /dev/null
 +++ b/src/new/mlibc/unistd.rs
 @@ -0,0 +1,7 @@
@@ -490,7 +490,7 @@ index 000000000..8d55ee582
 +    STDOUT_FILENO,
 +};
 diff --git a/src/new/mod.rs b/src/new/mod.rs
-index 2e6b451a9..869399376 100644
+index c0c6891..80daaad 100644
 --- a/src/new/mod.rs
 +++ b/src/new/mod.rs
 @@ -168,6 +168,9 @@ cfg_if! {
@@ -503,7 +503,7 @@ index 2e6b451a9..869399376 100644
      }
  }
  
-@@ -224,7 +227,8 @@ cfg_if! {
+@@ -228,7 +231,8 @@ cfg_if! {
              target_os = "android",
              target_os = "emscripten",
              target_os = "l4re",
@@ -514,5 +514,5 @@ index 2e6b451a9..869399376 100644
          pub use pthread::*;
          pub use unistd::*;
 -- 
-2.52.0
+2.54.0
 

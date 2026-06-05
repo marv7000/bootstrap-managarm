@@ -1,0 +1,140 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: The Managarm Project <info@managarm.org>
+Date: Thu, 5 Jun 2026 00:00:00 +0200
+Subject: [PATCH] rust: add managarm target support to vendored crates
+
+Recognize target_os = "managarm" in the vendored mio, socket2 and mtu copies
+and refresh their .cargo-checksum.json accordingly.
+---
+--- a/third_party/rust/mio/.cargo-checksum.json
++++ b/third_party/rust/mio/.cargo-checksum.json
+@@ -1 +1 @@
+-{"files":{"CHANGELOG.md":"1de2b6300265c1c979d864057b99f1b2de557e9b4d7a443f07111bc2cb5d3ee8","Cargo.toml":"68c2ace12b7b382625b9c6e7ce94e07a1be5b1faf6bba89f5cbadf99d2b44c00","LICENSE":"07919255c7e04793d8ea760d6c2ce32d19f9ff02bdbdde3ce90b1e1880929a9b","README.md":"9dcf711fa285f7ec2e0ce4914850e52d27a95d4adca455b96722f074520566b0","examples/tcp_listenfd_server.rs":"3e11f2318584f252989f28e5af536a06b01cb953f14f06f87c8f7a0f663242d6","examples/tcp_server.rs":"3d8b0315eebca8de0a09a6fd0fba2a2bf805ce339dee7a20fd45f4aedbebde71","examples/udp_server.rs":"115ecc0d9081adcbe63284ef47d21b93ae78208beb8ec22c229d0b7b92a2c38e","src/event/event.rs":"93539254a5d472b51ec5348c742cfbbe586bf710ad81b01f726289df1b0e2473","src/event/events.rs":"5cad85e0d0c9e619b6017f868c681ed0dc023e7aae8c0c5c0c7337b2fa96a8a6","src/event/mod.rs":"c129c42114867e3e7337a6605952db8cef8a7ef0938f67a28fa68e73fc420c6a","src/event/source.rs":"d2d1aaff10fb31e7d2dfe8a4500d100a9b2d0a2ab1663503c0f275b35b0072b6","src/interest.rs":"1a6975703d866ea636a41e8a0b278fbdf646b8f806d84c9616a8b959b5c4435c","src/io_source.rs":"c484919d3a1ba02584672f16f3839b2e66fba685dc07aa2113a97608b14e9da0","src/lib.rs":"2b05146347f2ca77eaced82afc30a8125661e90710f8a7393ca349abe7631bb4","src/macros.rs":"954a9c57fcdabc8625664880a41fedf2457ff87d5d5d6fee5e3c8c6112ac765b","src/net/mod.rs":"f7924b7e61d9212b18031ffebce2a42241119e4907c3f6284b07aae4067662b5","src/net/tcp/listener.rs":"880f845baae93d91c4b72cbdfa3c8e7c60f6de20f9952fe7bb01049c08134ce4","src/net/tcp/mod.rs":"f2c50c1d338a69d704e18727142d8495be2927b390d7bbb77cc0cf4e945ed83a","src/net/tcp/stream.rs":"6673a5fe862c4d8077d5f54c40881f7fafc8dfd494ea8527f0518a8032485aa7","src/net/udp.rs":"3c852aa4eadc6bd372a5697a1fce0ffaf3626606fac3f8f7f1b29592d70b5bd5","src/net/uds/datagram.rs":"fb4bf68b6e1ef7d7f2aed4acff3ae9173d11cd2937fa6486a6f3f67c3e029439","src/net/uds/listener.rs":"4a1843515326553504493833688065a066dfa13127bb1b8726c36b9f182daa28","src/net/uds/mod.rs":"39d8e36750564c22830af93fe7a9b000b6cbbe1c0f3b5eb527df14b6fc61fe14","src/net/uds/stream.rs":"64348e63a6abb49ac3ec111a415ede15afb9a73976f0669a3e8b734af2984550","src/poll.rs":"29a365b1f85d9a2d5a899f63e23bf9cf16e38c8ecb3669c9428e7a0ed325df33","src/sys/mod.rs":"ae5395669ac1cf60f3ca8b10c0b61ab366a8d74932b7cb654c0fcadf8008666d","src/sys/shell/mod.rs":"384480e21104e54d8fd5ea5444431f0a96f0ca79a0c4b70a6a63b19c371dce67","src/sys/shell/selector.rs":"f02a3ad46dc54a0cbb02d94335f70bf2a4df10cb3187abde1465c1fb79cbedbf","src/sys/shell/tcp.rs":"130028f166fa918f5cf48551afa6204792d5dae88eccd4dc4565814d3c151546","src/sys/shell/udp.rs":"0db637a4ce1ec3a5ccb410d1e94bcc525df8ad005c1d4235d7d50111d335dbde","src/sys/shell/uds.rs":"06b7e16d03fd7636401807548d145d99f666486b2d9a4976eccecc20499927ab","src/sys/shell/waker.rs":"81bc18cf52345a8d17e8142291e43dd70a36dfd9f5eb486f3e787998ee4451dc","src/sys/unix/mod.rs":"99da5dc878b4872d716ce6cc73ef4fa1f2d0f6794b9d7a24f45cdac2aa9e8970","src/sys/unix/net.rs":"9f77775969e6811b041990067030d5dadaeb8382d3835f4241ba701063720b98","src/sys/unix/pipe.rs":"37c4ee16550238deb838a7d342c945f38e9ab18491d8de4e75f3dd2f8d38ea4c","src/sys/unix/selector/epoll.rs":"689ade2c72f85caa204edada855790b7a617f78bc759487304be24c6ec4efb2d","src/sys/unix/selector/kqueue.rs":"51bed54d3fd6e93b5b6c7c420160a9f01a6a46b1170122e7c7d6ccf6e874ced4","src/sys/unix/selector/poll.rs":"e5ff526f0b3f8b614469a43d5e765eb0441030b86b03b1aa4f9fca561fdbfe79","src/sys/unix/selector/stateless_io_source.rs":"25465ea28b12461e721bff291e5a90c5adac3e4cf35a4d744235d557f4c501c8","src/sys/unix/sourcefd.rs":"f9f9b0c6715990896b1db62f92e36b0f9b4a562f28094cb57185c4887cf893c2","src/sys/unix/tcp.rs":"17e970986c6e9ec50d71df3263df416c092f5349d95b9796112f83f75926dc05","src/sys/unix/udp.rs":"2d9c704b059fdd0be6b844be4db8ef4dcad902fc146e9cf55eae5a5eef2fdb86","src/sys/unix/uds/datagram.rs":"c09a1cd0d9ca43e5291a892e8059a48b8db85af16f2b75a725534a7cfbe55efb","src/sys/unix/uds/listener.rs":"3d2e0f755d8b2ac4fa901af2c49aebfc8c18a2c9f5207e70fad729d39f0c683d","src/sys/unix/uds/mod.rs":"8417ea2b8818fa935eb0af8eac8143c69a1438df2710e401f0ef4345e928275a","src/sys/unix/uds/stream.rs":"4b0ec759a550b65ce396bb19b9593fce4ea57576d5d91c3cab9f743ecc6defd8","src/sys/unix/waker/eventfd.rs":"322d3fb6c322b556c6515c113c2705bcf5ff8c44ef56499578d455700d2366e5","src/sys/unix/waker/kqueue.rs":"8794269a3533d01672d8672a3210a254ebec66471247305eefb66b46d2110c14","src/sys/unix/waker/pipe.rs":"3705750619cd0d65785f94def876db4ac8945b6c396c5f7394c184c58ba6d5fb","src/sys/wasi/mod.rs":"1c269f5fd8aa19c467404cf3fb74de6931ce8856b5ae7604e9ab92a240ad9d70","src/sys/windows/afd.rs":"65a1287b385338e88efb895eb573a3bdb16a432ef6e95152be4f363efb2c1e73","src/sys/windows/event.rs":"2a40784b42d2cef9aeb02d281e73c2d3d96de74cb89609f439a0d080faa7dbd2","src/sys/windows/handle.rs":"f75276733a6f930f755a1bc5651cba8be52320a45709eec0b4ce5efe8779c5b6","src/sys/windows/io_status_block.rs":"052095e6b312244f1247c21cfac238dc66f593d19de3ceb1c430825c60fe01b2","src/sys/windows/iocp.rs":"d317c0b190eff605307d6333f28be7d793c8b11fbfa5d0638de732cba7e987e9","src/sys/windows/mod.rs":"efd3be8b902128fc22003c70c8e6e3237f518469a67d857d958f1e76fbf8b340","src/sys/windows/named_pipe.rs":"7a8d7e96b9c220aa27ecdb17e85512a2e07747711d253864052ea25fa394f41e","src/sys/windows/net.rs":"67093e8c2c672bc7e7c809c83f400061abac0b9e01a748811e3b91e410df008b","src/sys/windows/overlapped.rs":"94fa619a7655228485c714ef5b5ed4b703a360e51130cdfc07d20c1aa38cb3c5","src/sys/windows/selector.rs":"76faa07846037dac8424f9b2937ef77685be108f5b4d2dff05661192162034f5","src/sys/windows/tcp.rs":"4ece198438b7686c4d8cf9686b77a9be76a521305a8051865e648d98c3676e48","src/sys/windows/udp.rs":"45cbba2941287d89e089f168e29f65cea03b8b11aa8f5b7fee173d53a5c0e6b0","src/sys/windows/waker.rs":"cf27f75061b86dabe362d936c5945fd0e644aea833993de45d40b4be5fbbe56c","src/token.rs":"4e64c8e337fbee4e3a2f5e8661241b5261c9c5487e20fa73425d89e2e152e8de","src/waker.rs":"cd521418aede70369775607232d1162ff70f3993f4951ed113cc18fcd7af6539"},"package":null}
+\ No newline at end of file
++{"files":{"CHANGELOG.md":"1de2b6300265c1c979d864057b99f1b2de557e9b4d7a443f07111bc2cb5d3ee8","Cargo.toml":"68c2ace12b7b382625b9c6e7ce94e07a1be5b1faf6bba89f5cbadf99d2b44c00","LICENSE":"07919255c7e04793d8ea760d6c2ce32d19f9ff02bdbdde3ce90b1e1880929a9b","README.md":"9dcf711fa285f7ec2e0ce4914850e52d27a95d4adca455b96722f074520566b0","examples/tcp_listenfd_server.rs":"3e11f2318584f252989f28e5af536a06b01cb953f14f06f87c8f7a0f663242d6","examples/tcp_server.rs":"3d8b0315eebca8de0a09a6fd0fba2a2bf805ce339dee7a20fd45f4aedbebde71","examples/udp_server.rs":"115ecc0d9081adcbe63284ef47d21b93ae78208beb8ec22c229d0b7b92a2c38e","src/event/event.rs":"93539254a5d472b51ec5348c742cfbbe586bf710ad81b01f726289df1b0e2473","src/event/events.rs":"5cad85e0d0c9e619b6017f868c681ed0dc023e7aae8c0c5c0c7337b2fa96a8a6","src/event/mod.rs":"c129c42114867e3e7337a6605952db8cef8a7ef0938f67a28fa68e73fc420c6a","src/event/source.rs":"d2d1aaff10fb31e7d2dfe8a4500d100a9b2d0a2ab1663503c0f275b35b0072b6","src/interest.rs":"1a6975703d866ea636a41e8a0b278fbdf646b8f806d84c9616a8b959b5c4435c","src/io_source.rs":"c484919d3a1ba02584672f16f3839b2e66fba685dc07aa2113a97608b14e9da0","src/lib.rs":"2b05146347f2ca77eaced82afc30a8125661e90710f8a7393ca349abe7631bb4","src/macros.rs":"954a9c57fcdabc8625664880a41fedf2457ff87d5d5d6fee5e3c8c6112ac765b","src/net/mod.rs":"f7924b7e61d9212b18031ffebce2a42241119e4907c3f6284b07aae4067662b5","src/net/tcp/listener.rs":"880f845baae93d91c4b72cbdfa3c8e7c60f6de20f9952fe7bb01049c08134ce4","src/net/tcp/mod.rs":"f2c50c1d338a69d704e18727142d8495be2927b390d7bbb77cc0cf4e945ed83a","src/net/tcp/stream.rs":"6673a5fe862c4d8077d5f54c40881f7fafc8dfd494ea8527f0518a8032485aa7","src/net/udp.rs":"3c852aa4eadc6bd372a5697a1fce0ffaf3626606fac3f8f7f1b29592d70b5bd5","src/net/uds/datagram.rs":"fb4bf68b6e1ef7d7f2aed4acff3ae9173d11cd2937fa6486a6f3f67c3e029439","src/net/uds/listener.rs":"4a1843515326553504493833688065a066dfa13127bb1b8726c36b9f182daa28","src/net/uds/mod.rs":"39d8e36750564c22830af93fe7a9b000b6cbbe1c0f3b5eb527df14b6fc61fe14","src/net/uds/stream.rs":"64348e63a6abb49ac3ec111a415ede15afb9a73976f0669a3e8b734af2984550","src/poll.rs":"29a365b1f85d9a2d5a899f63e23bf9cf16e38c8ecb3669c9428e7a0ed325df33","src/sys/mod.rs":"ae5395669ac1cf60f3ca8b10c0b61ab366a8d74932b7cb654c0fcadf8008666d","src/sys/shell/mod.rs":"384480e21104e54d8fd5ea5444431f0a96f0ca79a0c4b70a6a63b19c371dce67","src/sys/shell/selector.rs":"f02a3ad46dc54a0cbb02d94335f70bf2a4df10cb3187abde1465c1fb79cbedbf","src/sys/shell/tcp.rs":"130028f166fa918f5cf48551afa6204792d5dae88eccd4dc4565814d3c151546","src/sys/shell/udp.rs":"0db637a4ce1ec3a5ccb410d1e94bcc525df8ad005c1d4235d7d50111d335dbde","src/sys/shell/uds.rs":"06b7e16d03fd7636401807548d145d99f666486b2d9a4976eccecc20499927ab","src/sys/shell/waker.rs":"81bc18cf52345a8d17e8142291e43dd70a36dfd9f5eb486f3e787998ee4451dc","src/sys/unix/mod.rs":"fad451d6da84dc05e950517ef72170d33a8e5839d236aea5bf1348ef805cd676","src/sys/unix/net.rs":"9f77775969e6811b041990067030d5dadaeb8382d3835f4241ba701063720b98","src/sys/unix/pipe.rs":"37c4ee16550238deb838a7d342c945f38e9ab18491d8de4e75f3dd2f8d38ea4c","src/sys/unix/selector/epoll.rs":"689ade2c72f85caa204edada855790b7a617f78bc759487304be24c6ec4efb2d","src/sys/unix/selector/kqueue.rs":"51bed54d3fd6e93b5b6c7c420160a9f01a6a46b1170122e7c7d6ccf6e874ced4","src/sys/unix/selector/poll.rs":"e5ff526f0b3f8b614469a43d5e765eb0441030b86b03b1aa4f9fca561fdbfe79","src/sys/unix/selector/stateless_io_source.rs":"25465ea28b12461e721bff291e5a90c5adac3e4cf35a4d744235d557f4c501c8","src/sys/unix/sourcefd.rs":"f9f9b0c6715990896b1db62f92e36b0f9b4a562f28094cb57185c4887cf893c2","src/sys/unix/tcp.rs":"3518d17ca456041aa9693015e7f2d6f033e4e0d299c55d81ded18a3d947d77bf","src/sys/unix/udp.rs":"2d9c704b059fdd0be6b844be4db8ef4dcad902fc146e9cf55eae5a5eef2fdb86","src/sys/unix/uds/datagram.rs":"c09a1cd0d9ca43e5291a892e8059a48b8db85af16f2b75a725534a7cfbe55efb","src/sys/unix/uds/listener.rs":"3d2e0f755d8b2ac4fa901af2c49aebfc8c18a2c9f5207e70fad729d39f0c683d","src/sys/unix/uds/mod.rs":"8417ea2b8818fa935eb0af8eac8143c69a1438df2710e401f0ef4345e928275a","src/sys/unix/uds/stream.rs":"4b0ec759a550b65ce396bb19b9593fce4ea57576d5d91c3cab9f743ecc6defd8","src/sys/unix/waker/eventfd.rs":"322d3fb6c322b556c6515c113c2705bcf5ff8c44ef56499578d455700d2366e5","src/sys/unix/waker/kqueue.rs":"8794269a3533d01672d8672a3210a254ebec66471247305eefb66b46d2110c14","src/sys/unix/waker/pipe.rs":"3705750619cd0d65785f94def876db4ac8945b6c396c5f7394c184c58ba6d5fb","src/sys/wasi/mod.rs":"1c269f5fd8aa19c467404cf3fb74de6931ce8856b5ae7604e9ab92a240ad9d70","src/sys/windows/afd.rs":"65a1287b385338e88efb895eb573a3bdb16a432ef6e95152be4f363efb2c1e73","src/sys/windows/event.rs":"2a40784b42d2cef9aeb02d281e73c2d3d96de74cb89609f439a0d080faa7dbd2","src/sys/windows/handle.rs":"f75276733a6f930f755a1bc5651cba8be52320a45709eec0b4ce5efe8779c5b6","src/sys/windows/io_status_block.rs":"052095e6b312244f1247c21cfac238dc66f593d19de3ceb1c430825c60fe01b2","src/sys/windows/iocp.rs":"d317c0b190eff605307d6333f28be7d793c8b11fbfa5d0638de732cba7e987e9","src/sys/windows/mod.rs":"efd3be8b902128fc22003c70c8e6e3237f518469a67d857d958f1e76fbf8b340","src/sys/windows/named_pipe.rs":"7a8d7e96b9c220aa27ecdb17e85512a2e07747711d253864052ea25fa394f41e","src/sys/windows/net.rs":"67093e8c2c672bc7e7c809c83f400061abac0b9e01a748811e3b91e410df008b","src/sys/windows/overlapped.rs":"94fa619a7655228485c714ef5b5ed4b703a360e51130cdfc07d20c1aa38cb3c5","src/sys/windows/selector.rs":"76faa07846037dac8424f9b2937ef77685be108f5b4d2dff05661192162034f5","src/sys/windows/tcp.rs":"4ece198438b7686c4d8cf9686b77a9be76a521305a8051865e648d98c3676e48","src/sys/windows/udp.rs":"45cbba2941287d89e089f168e29f65cea03b8b11aa8f5b7fee173d53a5c0e6b0","src/sys/windows/waker.rs":"cf27f75061b86dabe362d936c5945fd0e644aea833993de45d40b4be5fbbe56c","src/token.rs":"4e64c8e337fbee4e3a2f5e8661241b5261c9c5487e20fa73425d89e2e152e8de","src/waker.rs":"cd521418aede70369775607232d1162ff70f3993f4951ed113cc18fcd7af6539"},"package":null}
+\ No newline at end of file
+--- a/third_party/rust/mio/src/sys/unix/mod.rs
++++ b/third_party/rust/mio/src/sys/unix/mod.rs
+@@ -22,6 +22,7 @@
+             target_os = "illumos",
+             target_os = "linux",
+             target_os = "redox",
++            target_os = "managarm",
+         )
+     ), path = "selector/epoll.rs")]
+     #[cfg_attr(all(
+@@ -63,6 +64,7 @@
+             target_os = "hermit",
+             target_os = "illumos",
+             target_os = "linux",
++            target_os = "managarm",
+         )
+     ), path = "waker/eventfd.rs")]
+     #[cfg_attr(all(
+--- a/third_party/rust/mio/src/sys/unix/tcp.rs
++++ b/third_party/rust/mio/src/sys/unix/tcp.rs
+@@ -74,6 +74,7 @@
+         target_os = "openbsd",
+         target_os = "solaris",
+         target_os = "cygwin",
++        target_os = "managarm",
+     ))]
+     let stream = {
+         syscall!(accept4(
+--- a/third_party/rust/socket2/.cargo-checksum.json
++++ b/third_party/rust/socket2/.cargo-checksum.json
+@@ -1 +1 @@
+-{"files":{".cargo_vcs_info.json":"81045ecb49ff4e73f8d4579569df769c79471b43aa646dab1e77da339453c4bd","Cargo.toml":"5595647b71ebfcce328ff99f193a94540e821543806da2a0827211a126a1d86c","Cargo.toml.orig":"70ea160d6d7118863df39a19740463468c86514cf07e307c941e77816e9c8321","LICENSE-APACHE":"a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2","LICENSE-MIT":"378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397","README.md":"5b9d3a55525334c4abdb992a49f8dd4f9853f3c061e905334c56ab1dba1bb3ff","src/lib.rs":"be655647b87572b2f40a918ef6a08e58d03093c0c17890b60cb0d4a4720f854e","src/sockaddr.rs":"1e3a30766beb175a509ed295148de57a6ce6d39382e68c066a2bc4565fa1f033","src/socket.rs":"e634a3ee9abc8e9db6c5321a5404054501164095e84fcbe2bfa40569fd1bc9e5","src/sockref.rs":"7e16a5300cdd003e591486cb3bd384bdb92044e940e3ddf327da27935dc51e22","src/sys/unix.rs":"8b0149898cc89edb6672f51aafc704edd7c829d8d540e07b0b2e54a2d068ed51","src/sys/windows.rs":"0ad21ca832e93de790f6b3fd1e55a465e2af70fa273f2b3fc91ecfd82f13005a"},"package":"ce305eb0b4296696835b71df73eb912e0f1ffd2556a501fcede6e0c50349191c"}
+\ No newline at end of file
++{"files":{".cargo_vcs_info.json":"81045ecb49ff4e73f8d4579569df769c79471b43aa646dab1e77da339453c4bd","Cargo.toml":"5595647b71ebfcce328ff99f193a94540e821543806da2a0827211a126a1d86c","Cargo.toml.orig":"70ea160d6d7118863df39a19740463468c86514cf07e307c941e77816e9c8321","LICENSE-APACHE":"a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2","LICENSE-MIT":"378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397","README.md":"5b9d3a55525334c4abdb992a49f8dd4f9853f3c061e905334c56ab1dba1bb3ff","src/lib.rs":"be655647b87572b2f40a918ef6a08e58d03093c0c17890b60cb0d4a4720f854e","src/sockaddr.rs":"1e3a30766beb175a509ed295148de57a6ce6d39382e68c066a2bc4565fa1f033","src/socket.rs":"e634a3ee9abc8e9db6c5321a5404054501164095e84fcbe2bfa40569fd1bc9e5","src/sockref.rs":"7e16a5300cdd003e591486cb3bd384bdb92044e940e3ddf327da27935dc51e22","src/sys/unix.rs":"a5c5a936db0d4e054a6a3bb13fe8b2aa6d25fc9024cb340c5018aa2f6cf153b1","src/sys/windows.rs":"0ad21ca832e93de790f6b3fd1e55a465e2af70fa273f2b3fc91ecfd82f13005a"},"package":"ce305eb0b4296696835b71df73eb912e0f1ffd2556a501fcede6e0c50349191c"}
+\ No newline at end of file
+--- a/third_party/rust/socket2/src/sys/unix.rs
++++ b/third_party/rust/socket2/src/sys/unix.rs
+@@ -348,6 +348,7 @@
+     target_os = "watchos",
+     target_os = "espidf",
+     target_os = "vita",
++    target_os = "managarm",
+ ))]
+ type IovLen = c_int;
+ 
+--- a/third_party/rust/mtu/.cargo-checksum.json
++++ b/third_party/rust/mtu/.cargo-checksum.json
+@@ -1 +1 @@
+-{"files":{".clippy.toml":"993a239afe67626230020a264a03ed4f641c80fcac76236508a613d1821828c6","Cargo.toml":"dbbc74a0ef875bdb6c2fa35ca3eaf26758272bd451ecb0f0936d6f8d57d5aae4","LICENSE-APACHE":"a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2","LICENSE-MIT":"4ad721b5b6a3d39ca3e2202f403d897c4a1d42896486dd58963a81f8e64ef61d","README.md":"24df0e24154b7f0096570ad221aea02bd53a0f1124a2adafff5730af5443a65c","SECURITY.md":"75455814b6cf997e22a927eb979b4356d788583aa1eb96e90853aaab0f82ad1b","build.rs":"a7b5900ab96d4319f3a74cc02053e5f8b373bbac5e302fe92a8b3e738c954ef7","src/bin/mtu-lookup.rs":"9ff9ae9873d1f6faeacf45d8ab5924d3ec680a9c51976538aa15bbe304a228c6","src/bsd.rs":"716b5737d52a96410e422a36123c9fe8eda7becdfc09739887caef93816a8945","src/lib.rs":"31f6b57f0294a7cfbfee4efd4ee538388b1ad52b7870b5f1d05122eb95992df8","src/linux.rs":"314aa8a64956497721dfa944b0c390aeead7162b277a743a22cc616eb4ab3473","src/routesocket.rs":"ac369a7f5304c54f24b452be465a9a243f5b39b56e713b58fd9064aff240470c","src/windows.rs":"96b833f13dba872c0894fe4f4e3779de73d747a29f8d51733ea46fd3deb3ab59"},"package":null}
+\ No newline at end of file
++{"files":{".clippy.toml":"993a239afe67626230020a264a03ed4f641c80fcac76236508a613d1821828c6","Cargo.toml":"dbbc74a0ef875bdb6c2fa35ca3eaf26758272bd451ecb0f0936d6f8d57d5aae4","LICENSE-APACHE":"a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2","LICENSE-MIT":"4ad721b5b6a3d39ca3e2202f403d897c4a1d42896486dd58963a81f8e64ef61d","README.md":"24df0e24154b7f0096570ad221aea02bd53a0f1124a2adafff5730af5443a65c","SECURITY.md":"75455814b6cf997e22a927eb979b4356d788583aa1eb96e90853aaab0f82ad1b","build.rs":"a7b5900ab96d4319f3a74cc02053e5f8b373bbac5e302fe92a8b3e738c954ef7","src/bin/mtu-lookup.rs":"9ff9ae9873d1f6faeacf45d8ab5924d3ec680a9c51976538aa15bbe304a228c6","src/bsd.rs":"716b5737d52a96410e422a36123c9fe8eda7becdfc09739887caef93816a8945","src/lib.rs":"759fa7202c16444c245d0e75b78e6b6b248e3b2e41c4411c850219f568bad861","src/linux.rs":"314aa8a64956497721dfa944b0c390aeead7162b277a743a22cc616eb4ab3473","src/routesocket.rs":"ac369a7f5304c54f24b452be465a9a243f5b39b56e713b58fd9064aff240470c","src/windows.rs":"96b833f13dba872c0894fe4f4e3779de73d747a29f8d51733ea46fd3deb3ab59"},"package":null}
+\ No newline at end of file
+--- a/third_party/rust/mtu/src/lib.rs
++++ b/third_party/rust/mtu/src/lib.rs
+@@ -52,7 +52,7 @@
+     net::IpAddr,
+ };
+ 
+-#[cfg(not(target_os = "windows"))]
++#[cfg(all(not(target_os = "windows"), not(target_os = "managarm")))]
+ macro_rules! asserted_const_with_type {
+     ($name:ident, $t1:ty, $e:expr, $t2:ty) => {
+         #[allow(
+@@ -75,7 +75,7 @@
+ #[cfg(target_os = "windows")]
+ mod windows;
+ 
+-#[cfg(not(target_os = "windows"))]
++#[cfg(all(not(target_os = "windows"), not(target_os = "managarm")))]
+ mod routesocket;
+ 
+ #[cfg(any(target_os = "macos", bsd))]
+@@ -91,14 +91,14 @@
+ }
+ 
+ /// Prepare an error for cases that "should never happen".
+-#[cfg(not(target_os = "windows"))]
++#[cfg(all(not(target_os = "windows"), not(target_os = "managarm")))]
+ fn unlikely_err(msg: String) -> Error {
+     debug_assert!(false, "{msg}");
+     Error::other(msg)
+ }
+ 
+ /// Align `size` to the next multiple of `align` (which needs to be a power of two).
+-#[cfg(not(target_os = "windows"))]
++#[cfg(all(not(target_os = "windows"), not(target_os = "managarm")))]
+ const fn aligned_by(size: usize, align: usize) -> usize {
+     if size == 0 {
+         align
+@@ -110,7 +110,7 @@
+ // Platforms currently not supported.
+ //
+ // See <https://github.com/mozilla/mtu/issues/82>.
+-#[cfg(any(target_os = "ios", target_os = "tvos", target_os = "visionos"))]
++#[cfg(any(target_os = "ios", target_os = "tvos", target_os = "visionos", target_os = "managarm"))]
+ pub fn interface_and_mtu_impl(remote: IpAddr) -> Result<(String, usize)> {
+     return Err(default_err());
+ }
+@@ -198,7 +198,7 @@
+     }
+ 
+     #[test]
+-    #[cfg(not(target_os = "windows"))]
++    #[cfg(all(not(target_os = "windows"), not(target_os = "managarm")))]
+     fn aligned_by() {
+         for (size, align, expected) in [
+             (0, 8, 8),
+@@ -220,7 +220,7 @@
+         match res {
+             Ok(res) => assert_eq!(res, INET),
+             Err(e) => {
+-                #[cfg(not(target_os = "windows"))]
++                #[cfg(all(not(target_os = "windows"), not(target_os = "managarm")))]
+                 let no_ipv6 = matches!(e.raw_os_error(), Some(libc::ENETUNREACH | libc::ESRCH));
+                 #[cfg(target_os = "windows")]
+                 let no_ipv6 = e.raw_os_error()
+@@ -248,7 +248,7 @@
+ 
+     #[test]
+     #[should_panic(expected = "test error")]
+-    #[cfg(not(target_os = "windows"))]
++    #[cfg(all(not(target_os = "windows"), not(target_os = "managarm")))]
+     #[cfg(debug_assertions)]
+     fn unlikely_error_panics() {
+         crate::unlikely_err("test error".to_string());

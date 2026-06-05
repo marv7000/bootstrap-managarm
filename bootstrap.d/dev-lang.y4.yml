@@ -33,6 +33,14 @@ sources:
     extract_path: 'vala-0.56.18'
     version: '0.56.18'
 
+  - name: nodejs
+    subdir: 'ports'
+    url: 'https://nodejs.org/dist/v24.16.0/node-v24.16.0.tar.xz'
+    format: 'tar.xz'
+    checksum: blake2b:e5168b8c6baebe6a271bfc31ff3e9f09e30fc794d5ce1d6d092c52c70caa610d7968fa511d3e9fe34ad8bcf6310753753575d9aa1365927e87c5aca29ce4b7f2
+    extract_path: 'node-v24.16.0'
+    version: '24.16.0'
+
   - name: host-bootstrap-cargo
     subdir: 'ports'
     url: 'https://static.rust-lang.org/dist/cargo-1.86.0-x86_64-unknown-linux-gnu.tar.xz'
@@ -51,6 +59,19 @@ tools:
         - '@THIS_SOURCE_DIR@/configure'
         - '--prefix=@PREFIX@'
     revision: 1
+    compile:
+      - args: ['make', '-j@PARALLELISM@']
+    install:
+      - args: ['make', 'install']
+
+  - name: host-nodejs
+    labels: [aarch64, riscv64]
+    architecture: noarch
+    from_source: nodejs
+    revision: 1
+    configure:
+      - args: ['cp', '-r', '@THIS_SOURCE_DIR@/.', '@THIS_BUILD_DIR@']
+      - args: ['python3', './configure', '--prefix=@PREFIX@']
     compile:
       - args: ['make', '-j@PARALLELISM@']
     install:
@@ -166,8 +187,10 @@ tools:
     source:
       subdir: 'ports'
       git: 'https://github.com/rust-lang/cargo.git'
-      tag: '0.87.0'
-      version: '0.87.0'
+      # Track host-rust (1.92.0); cargo 0.93.0 reports as cargo 1.92.0. The old
+      # 0.87.0 pin reported cargo 1.86.0, below Firefox 150's 1.90.0 floor.
+      tag: '0.93.0'
+      version: '0.93.0'
     tools_required:
       - tool: host-rust
         recursive: true
@@ -179,7 +202,7 @@ tools:
       - rust-patched-libs
       # Cargo requires cargo to build, so we download a binary that we can use temporarily
       - host-bootstrap-cargo
-    revision: 1
+    revision: 2
     compile:
       - args:
         - '@THIS_SOURCE_DIR@/../host-bootstrap-cargo/cargo/bin/cargo'

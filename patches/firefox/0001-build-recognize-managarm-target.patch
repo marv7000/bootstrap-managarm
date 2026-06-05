@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: The Managarm Project <info@managarm.org>
+Date: Thu, 5 Jun 2026 00:00:00 +0200
+Subject: [PATCH] build: recognize managarm as a Linux-like target
+
+Map *-managarm-* triples to a GNU/Linux-like OS and a Linux kernel so the
+GTK3 toolkit and unix build paths are selected.
+---
+--- a/build/moz.configure/init.configure
++++ b/build/moz.configure/init.configure
+@@ -485,6 +485,9 @@
+     if "android" in os:
+         canonical_os = "Android"
+         canonical_kernel = "Linux"
++    elif "managarm" in os:
++        canonical_os = "GNU"
++        canonical_kernel = "Linux"
+     elif os.startswith("linux"):
+         canonical_os = "GNU"
+         canonical_kernel = "Linux"

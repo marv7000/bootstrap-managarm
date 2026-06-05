@@ -1,0 +1,314 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: The Managarm Project <info@managarm.org>
+Date: Thu, 5 Jun 2026 00:00:00 +0200
+Subject: [PATCH] managarm: platform support for the mlibc-based userspace
+
+Add __managarm__ guards across mozglue, ipc/chromium, js, xpcom, mfbt and the
+vendored drm headers: route managarm to the libc gettid()/mmap paths instead
+of raw syscalls, shim res_nquery, and size the mutex/condvar storage for
+mlibc's non-pointer-multiple pthread types.
+---
+--- a/dom/media/CubebUtils.cpp
++++ b/dom/media/CubebUtils.cpp
+@@ -853,7 +853,7 @@
+ #endif
+ #ifdef MOZ_CUBEB_REMOTING
+   if (sCubebSandbox && XRE_IsContentProcess()) {
+-#  if defined(XP_LINUX) && !defined(MOZ_WIDGET_ANDROID)
++#  if defined(XP_LINUX) && !defined(MOZ_WIDGET_ANDROID) && !defined(__managarm__)
+     if (atp_set_real_time_limit(0, 48000)) {
+       MOZ_LOG(gCubebLog, LogLevel::Warning,
+               ("could not set real-time limit in CubebUtils::InitLibrary"));
+--- a/gfx/angle/checkout/src/common/platform.h
++++ b/gfx/angle/checkout/src/common/platform.h
+@@ -23,7 +23,7 @@
+ #elif defined(__ggp__)
+ #    define ANGLE_PLATFORM_GGP 1
+ #    define ANGLE_PLATFORM_POSIX 1
+-#elif defined(__linux__) || defined(EMSCRIPTEN)
++#elif defined(__linux__) || defined(EMSCRIPTEN) || defined(__managarm__)
+ #    define ANGLE_PLATFORM_LINUX 1
+ #    define ANGLE_PLATFORM_POSIX 1
+ #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) ||              \
+--- a/ipc/chromium/src/base/dir_reader_posix.h
++++ b/ipc/chromium/src/base/dir_reader_posix.h
+@@ -16,7 +16,7 @@
+ // seems worse than falling back to enumerating all file descriptors so we will
+ // probably never implement this on the Mac.
+ 
+-#if defined(XP_LINUX)
++#if defined(XP_LINUX) && !defined(__managarm__)
+ #  include "base/dir_reader_linux.h"
+ #elif (defined(__DragonFly__) || defined(XP_FREEBSD) || defined(XP_NETBSD) || \
+        defined(XP_OPENBSD)) &&                                                \
+@@ -28,7 +28,7 @@
+ 
+ namespace base {
+ 
+-#if defined(XP_LINUX)
++#if defined(XP_LINUX) && !defined(__managarm__)
+ typedef DirReaderLinux DirReaderPosix;
+ #elif (defined(__DragonFly__) || defined(XP_FREEBSD) || defined(XP_NETBSD) || \
+        defined(XP_OPENBSD)) &&                                                \
+--- a/ipc/chromium/src/base/platform_thread_posix.cc
++++ b/ipc/chromium/src/base/platform_thread_posix.cc
+@@ -11,6 +11,8 @@
+ #  include <mach/mach.h>
+ #elif defined(XP_NETBSD)
+ #  include <lwp.h>
++#elif defined(__managarm__)
++#  include <unistd.h>
+ #elif defined(XP_LINUX)
+ #  include <sys/syscall.h>
+ #  include <sys/prctl.h>
+@@ -48,6 +50,8 @@
+   mach_port_t port = mach_thread_self();
+   mach_port_deallocate(mach_task_self(), port);
+   return port;
++#elif defined(__managarm__)
++  return gettid();
+ #elif defined(XP_LINUX)
+   return syscall(__NR_gettid);
+ #elif defined(XP_OPENBSD) || defined(XP_SOLARIS) || defined(__GLIBC__)
+--- a/ipc/glue/SharedMemoryPlatform_posix.cpp
++++ b/ipc/glue/SharedMemoryPlatform_posix.cpp
+@@ -13,7 +13,7 @@
+ #include <sys/stat.h>
+ #include <unistd.h>
+ 
+-#ifdef XP_LINUX
++#if defined(XP_LINUX) && !defined(__managarm__)
+ #  include "base/linux_memfd_defs.h"
+ #endif
+ #ifdef MOZ_WIDGET_GTK
+--- a/js/src/gc/Memory.cpp
++++ b/js/src/gc/Memory.cpp
+@@ -32,7 +32,7 @@
+ #  include <errno.h>
+ #  include <unistd.h>
+ 
+-#  ifdef XP_LINUX
++#  if defined(XP_LINUX) && !defined(__managarm__)
+ // For SYS_gettid. Older glibc does not provide gettid() wrapper.
+ #    include <sys/syscall.h>
+ #  endif
+--- a/js/src/wasm/WasmSignalHandlers.cpp
++++ b/js/src/wasm/WasmSignalHandlers.cpp
+@@ -115,8 +115,8 @@
+ #      define R01_sig(p) ((p)->sc_frame.fixreg[1])
+ #      define R32_sig(p) ((p)->sc_frame.srr0)
+ #    endif
+-#  elif defined(__linux__) || defined(__sun)
+-#    if defined(__linux__)
++#  elif defined(__linux__) || defined(__sun) || defined(__managarm__)
++#    if defined(__linux__) || defined(__managarm__)
+ #      define EIP_sig(p) ((p)->uc_mcontext.gregs[REG_EIP])
+ #      define EBP_sig(p) ((p)->uc_mcontext.gregs[REG_EBP])
+ #      define ESP_sig(p) ((p)->uc_mcontext.gregs[REG_ESP])
+--- a/memory/build/Chunk.cpp
++++ b/memory/build/Chunk.cpp
+@@ -171,8 +171,9 @@
+ //
+ // On Alpha, glibc has a bug that prevents syscall() to work for system
+ // calls with 6 arguments.
+-#if (defined(XP_LINUX) && !defined(__alpha__)) || \
+-    (defined(__FreeBSD_kernel__) && defined(__GLIBC__))
++#if ((defined(XP_LINUX) && !defined(__alpha__)) || \
++     (defined(__FreeBSD_kernel__) && defined(__GLIBC__))) && \
++    !defined(__managarm__)
+ #  include <sys/syscall.h>
+ #  if defined(SYS_mmap) || defined(SYS_mmap2)
+ static inline void* _mmap(void* addr, size_t length, int prot, int flags,
+--- a/mfbt/TaggedAnonymousMemory.cpp
++++ b/mfbt/TaggedAnonymousMemory.cpp
+@@ -2,7 +2,7 @@
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+-#ifdef XP_LINUX
++#if defined(XP_LINUX) && !defined(__managarm__)
+ 
+ #  include "mozilla/TaggedAnonymousMemory.h"
+ 
+--- a/mfbt/TaggedAnonymousMemory.h
++++ b/mfbt/TaggedAnonymousMemory.h
+@@ -40,7 +40,7 @@
+ 
+ #  include "mozilla/Types.h"  // IWYU pragma: keep(MFBT_API)
+ 
+-#  ifdef XP_LINUX
++#  if defined(XP_LINUX) && !defined(__managarm__)
+ 
+ #    ifdef __cplusplus
+ extern "C" {
+--- a/mozglue/baseprofiler/core/ProfilerUtils.cpp
++++ b/mozglue/baseprofiler/core/ProfilerUtils.cpp
+@@ -92,6 +92,16 @@
+ 
+ }  // namespace mozilla::baseprofiler
+ 
++#  elif defined(__managarm__)
++
++namespace mozilla::baseprofiler {
++
++BaseProfilerThreadId profiler_current_thread_id() {
++  return BaseProfilerThreadId::FromNativeId(gettid());
++}
++
++}  // namespace mozilla::baseprofiler
++
+ // ------------------------------------------------------- Linux
+ #  elif defined(XP_LINUX)
+ 
+--- a/mozglue/misc/PlatformConditionVariable.h
++++ b/mozglue/misc/PlatformConditionVariable.h
+@@ -48,10 +48,14 @@
+   PlatformData* platformData();
+ 
+ #if !defined(XP_WIN) && !defined(__wasi__)
++#  ifdef __managarm__
++  void* platformData_[(sizeof(pthread_cond_t) + sizeof(void*) - 1) / sizeof(void*)];
++#  else
+   void* platformData_[sizeof(pthread_cond_t) / sizeof(void*)];
+   static_assert(sizeof(pthread_cond_t) / sizeof(void*) != 0 &&
+                     sizeof(pthread_cond_t) % sizeof(void*) == 0,
+                 "pthread_cond_t must have pointer alignment");
++#  endif
+ #else
+   void* platformData_[4];
+ #endif
+--- a/mozglue/misc/PlatformMutex.h
++++ b/mozglue/misc/PlatformMutex.h
+@@ -44,10 +44,14 @@
+   PlatformData* platformData();
+ 
+ #if !defined(XP_WIN) && !defined(__wasi__)
++#  ifdef __managarm__
++  void* platformData_[(sizeof(pthread_mutex_t) + sizeof(void*) - 1) / sizeof(void*)];
++#  else
+   void* platformData_[sizeof(pthread_mutex_t) / sizeof(void*)];
+   static_assert(sizeof(pthread_mutex_t) / sizeof(void*) != 0 &&
+                     sizeof(pthread_mutex_t) % sizeof(void*) == 0,
+                 "pthread_mutex_t must have pointer alignment");
++#  endif
+ #else
+   void* platformData_[6];
+ #endif
+--- a/mozglue/misc/TimeStamp_posix.cpp
++++ b/mozglue/misc/TimeStamp_posix.cpp
+@@ -11,7 +11,9 @@
+ // obtained with this API; see TimeDuration::Resolution;
+ //
+ 
+-#include <sys/syscall.h>
++#ifndef __managarm__
++#  include <sys/syscall.h>
++#endif
+ #include <time.h>
+ #include <unistd.h>
+ #include <string.h>
+@@ -205,8 +207,12 @@
+   }
+ 
+   char threadStat[40];
++#ifdef __managarm__
++  SprintfLiteral(threadStat, "/proc/self/task/%d/stat", (pid_t)gettid());
++#else
+   SprintfLiteral(threadStat, "/proc/self/task/%d/stat",
+                  (pid_t)syscall(__NR_gettid));
++#endif
+ 
+   uint64_t threadJiffies = JiffiesSinceBoot(threadStat);
+   uint64_t selfJiffies = JiffiesSinceBoot("/proc/self/stat");
+--- a/netwerk/dns/PlatformDNSUnix.cpp
++++ b/netwerk/dns/PlatformDNSUnix.cpp
+@@ -15,6 +15,14 @@
+ #include <netinet/in.h>
+ #include <resolv.h>
+ 
++#if defined(__managarm__)
++#  include <arpa/nameser.h>
++static inline int res_nquery(struct __res_state*, const char* dname, int klass,
++                             int type, unsigned char* answer, int anslen) {
++  return res_query(dname, klass, type, answer, anslen);
++}
++#endif
++
+ namespace mozilla::net {
+ 
+ #if defined(HAVE_RES_NINIT)
+--- a/third_party/drm/drm/include/libdrm/drm.h
++++ b/third_party/drm/drm/include/libdrm/drm.h
+@@ -35,7 +35,7 @@
+ #ifndef _DRM_H_
+ #define _DRM_H_
+ 
+-#if   defined(__linux__)
++#if   defined(__linux__) || defined(__managarm__)
+ 
+ #include <linux/types.h>
+ #include <asm/ioctl.h>
+--- a/third_party/drm/drm/xf86drm.h
++++ b/third_party/drm/drm/xf86drm.h
+@@ -47,7 +47,7 @@
+ #define DRM_MAX_MINOR   64 /* deprecated */
+ #endif
+ 
+-#if defined(__linux__)
++#if defined(__linux__) || defined(__managarm__)
+ 
+ #define DRM_IOCTL_NR(n)		_IOC_NR(n)
+ #define DRM_IOC_VOID		_IOC_NONE
+--- a/toolkit/components/backgroundhangmonitor/ThreadStackHelper.cpp
++++ b/toolkit/components/backgroundhangmonitor/ThreadStackHelper.cpp
+@@ -37,7 +37,9 @@
+ #ifdef XP_LINUX
+ #  include <ucontext.h>
+ #  include <unistd.h>
+-#  include <sys/syscall.h>
++#  ifndef __managarm__
++#    include <sys/syscall.h>
++#  endif
+ #endif
+ 
+ #ifdef __GNUC__
+--- a/toolkit/components/backgroundhangmonitor/ThreadStackHelper.h
++++ b/toolkit/components/backgroundhangmonitor/ThreadStackHelper.h
+@@ -38,6 +38,10 @@
+ #  undef MOZ_THREADSTACKHELPER_NATIVE_STACK
+ #endif
+ 
++#if defined(__managarm__)
++#  undef MOZ_THREADSTACKHELPER_NATIVE_STACK
++#endif
++
+ namespace mozilla {
+ 
+ /**
+--- a/tools/profiler/core/ProfilerUtils.cpp
++++ b/tools/profiler/core/ProfilerUtils.cpp
+@@ -59,6 +59,12 @@
+   return ProfilerThreadId::FromNativeId(gettid());
+ }
+ 
++#  elif defined(__managarm__)
++
++ProfilerThreadId profiler_current_thread_id() {
++  return ProfilerThreadId::FromNativeId(gettid());
++}
++
+ // ------------------------------------------------------- Linux
+ #  elif defined(XP_LINUX)
+ 
+--- a/xpcom/io/nsLocalFileUnix.h
++++ b/xpcom/io/nsLocalFileUnix.h
+@@ -28,7 +28,8 @@
+ #  define LSTAT lstat
+ #endif
+ 
+-#if defined(HAVE_SYS_QUOTA_H) && defined(HAVE_LINUX_QUOTA_H)
++#if defined(HAVE_SYS_QUOTA_H) && defined(HAVE_LINUX_QUOTA_H) && \
++    !defined(__managarm__)
+ #  define USE_LINUX_QUOTACTL
+ #endif
+ 

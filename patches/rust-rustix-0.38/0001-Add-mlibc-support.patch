@@ -1,6 +1,6 @@
-From f231158ea82e9d1b429f4ffe6cc2c8c7df219dca Mon Sep 17 00:00:00 2001
+From c5b8ca720a6b9df2b66ada5e8c077a164cc48919 Mon Sep 17 00:00:00 2001
 From: Dennis Bonke <admin@dennisbonke.com>
-Date: Fri, 4 Apr 2025 16:02:28 +0200
+Date: Thu, 4 Jun 2026 11:29:09 +0200
 Subject: [PATCH] Add mlibc support
 
 ---
@@ -14,13 +14,13 @@ Subject: [PATCH] Add mlibc support
  7 files changed, 49 insertions(+), 29 deletions(-)
 
 diff --git a/src/backend/libc/conv.rs b/src/backend/libc/conv.rs
-index 4f7bb5d..c087387 100644
+index f4b440b..c8b6091 100644
 --- a/src/backend/libc/conv.rs
 +++ b/src/backend/libc/conv.rs
 @@ -73,7 +73,8 @@ pub(super) fn ret_c_int(raw: c::c_int) -> io::Result<c::c_int> {
  #[cfg(any(
      linux_kernel,
-     all(target_os = "illumos", feature = "event"),
+     all(solarish, feature = "event"),
 -    all(target_os = "redox", feature = "event")
 +    all(target_os = "redox", feature = "event"),
 +    all(target_os = "managarm", feature = "event"),
@@ -44,18 +44,18 @@ index 4f7bb5d..c087387 100644
              target_os = "linux",
              not(target_env = "musl"),
 diff --git a/src/backend/libc/event/mod.rs b/src/backend/libc/event/mod.rs
-index ff826fc..4a2ec48 100644
+index 23797dd..7f69d1b 100644
 --- a/src/backend/libc/event/mod.rs
 +++ b/src/backend/libc/event/mod.rs
 @@ -5,5 +5,5 @@ pub(crate) mod types;
  #[cfg_attr(windows, path = "windows_syscalls.rs")]
  pub(crate) mod syscalls;
  
--#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
-+#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox", target_os = "managarm"))]
+-#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
++#[cfg(any(linux_kernel, solarish, target_os = "redox", target_os = "managarm"))]
  pub mod epoll;
 diff --git a/src/backend/libc/event/syscalls.rs b/src/backend/libc/event/syscalls.rs
-index 5beaed1..f8633ad 100644
+index 2f55dfb..7299db8 100644
 --- a/src/backend/libc/event/syscalls.rs
 +++ b/src/backend/libc/event/syscalls.rs
 @@ -1,11 +1,11 @@
@@ -67,8 +67,8 @@ index 5beaed1..f8633ad 100644
  use crate::backend::conv::ret;
  use crate::backend::conv::ret_c_int;
  #[cfg(feature = "alloc")]
--#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
-+#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox", target_os = "managarm"))]
+-#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
++#[cfg(any(linux_kernel, solarish, target_os = "redox", target_os = "managarm"))]
  use crate::backend::conv::ret_u32;
  #[cfg(solarish)]
  use crate::event::port::Event;
@@ -88,8 +88,8 @@ index 5beaed1..f8633ad 100644
  use crate::io;
  #[cfg(solarish)]
  use crate::utils::as_mut_ptr;
--#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
-+#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox", target_os = "managarm"))]
+-#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
++#[cfg(any(linux_kernel, solarish, target_os = "redox", target_os = "managarm"))]
  use crate::utils::as_ptr;
  #[cfg(any(
      all(feature = "alloc", bsd),
@@ -148,7 +148,7 @@ index 5beaed1..f8633ad 100644
  pub(crate) unsafe fn select(
      nfds: i32,
      readfds: Option<&mut [FdSetElement]>,
-@@ -367,7 +371,7 @@ pub(crate) fn port_send(
+@@ -342,7 +346,7 @@ pub(crate) fn port_send(
      unsafe { ret(c::port_send(borrowed_fd(port), events, userdata)) }
  }
  
@@ -157,46 +157,46 @@ index 5beaed1..f8633ad 100644
  pub(crate) fn pause() {
      let r = unsafe { c::pause() };
      let errno = libc_errno::errno().0;
-@@ -376,13 +380,13 @@ pub(crate) fn pause() {
+@@ -351,13 +355,13 @@ pub(crate) fn pause() {
  }
  
  #[inline]
--#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
-+#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox", target_os = "managarm"))]
+-#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
++#[cfg(any(linux_kernel, solarish, target_os = "redox", target_os = "managarm"))]
  pub(crate) fn epoll_create(flags: super::epoll::CreateFlags) -> io::Result<OwnedFd> {
      unsafe { ret_owned_fd(c::epoll_create1(bitflags_bits!(flags))) }
  }
  
  #[inline]
--#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
-+#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox", target_os = "managarm"))]
+-#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
++#[cfg(any(linux_kernel, solarish, target_os = "redox", target_os = "managarm"))]
  pub(crate) fn epoll_add(
      epoll: BorrowedFd<'_>,
      source: BorrowedFd<'_>,
-@@ -403,7 +407,7 @@ pub(crate) fn epoll_add(
+@@ -378,7 +382,7 @@ pub(crate) fn epoll_add(
  }
  
  #[inline]
--#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
-+#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox", target_os = "managarm"))]
+-#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
++#[cfg(any(linux_kernel, solarish, target_os = "redox", target_os = "managarm"))]
  pub(crate) fn epoll_mod(
      epoll: BorrowedFd<'_>,
      source: BorrowedFd<'_>,
-@@ -421,7 +425,7 @@ pub(crate) fn epoll_mod(
+@@ -396,7 +400,7 @@ pub(crate) fn epoll_mod(
  }
  
  #[inline]
--#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
-+#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox", target_os = "managarm"))]
+-#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
++#[cfg(any(linux_kernel, solarish, target_os = "redox", target_os = "managarm"))]
  pub(crate) fn epoll_del(epoll: BorrowedFd<'_>, source: BorrowedFd<'_>) -> io::Result<()> {
      unsafe {
          ret(c::epoll_ctl(
-@@ -435,7 +439,7 @@ pub(crate) fn epoll_del(epoll: BorrowedFd<'_>, source: BorrowedFd<'_>) -> io::Re
+@@ -410,7 +414,7 @@ pub(crate) fn epoll_del(epoll: BorrowedFd<'_>, source: BorrowedFd<'_>) -> io::Re
  
  #[inline]
  #[cfg(feature = "alloc")]
--#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
-+#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox", target_os = "managarm"))]
+-#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
++#[cfg(any(linux_kernel, solarish, target_os = "redox", target_os = "managarm"))]
  pub(crate) fn epoll_wait(
      epoll: BorrowedFd<'_>,
      events: &mut [MaybeUninit<crate::event::epoll::Event>],
@@ -229,7 +229,7 @@ index a04d7e6..4b56eee 100644
  bitflags! {
      /// `EFD_*` flags for use with [`eventfd`].
 diff --git a/src/backend/libc/fs/types.rs b/src/backend/libc/fs/types.rs
-index 8d70615..0c2a87b 100644
+index c8bb01f..b3d626b 100644
 --- a/src/backend/libc/fs/types.rs
 +++ b/src/backend/libc/fs/types.rs
 @@ -841,6 +841,7 @@ bitflags! {
@@ -273,14 +273,14 @@ index 8d70615..0c2a87b 100644
          const UNSHARE_RANGE = bitcast!(c::FALLOC_FL_UNSHARE_RANGE);
  
 diff --git a/src/event/mod.rs b/src/event/mod.rs
-index 13a52ff..3a4edcc 100644
+index 38091a9..40d1e5f 100644
 --- a/src/event/mod.rs
 +++ b/src/event/mod.rs
 @@ -1,33 +1,35 @@
  //! Event operations.
  
--#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
-+#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox", target_os = "managarm"))]
+-#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
++#[cfg(any(linux_kernel, solarish, target_os = "redox", target_os = "managarm"))]
  pub mod epoll;
  #[cfg(any(
      linux_kernel,
@@ -335,5 +335,5 @@ index 2f0c951..8028232 100644
  #[cfg(all(
      not(linux_raw),
 -- 
-2.47.2
+2.54.0
 

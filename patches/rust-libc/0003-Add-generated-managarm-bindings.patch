@@ -1,7 +1,7 @@
-From 181b1d303d75d8307144daa30f6754540139ba81 Mon Sep 17 00:00:00 2001
+From da311e39a19b8fca142b5854504a5a20c6bea882 Mon Sep 17 00:00:00 2001
 From: no92 <no92.mail@gmail.com>
-Date: Fri, 28 Mar 2025 19:33:56 +0100
-Subject: [PATCH 3/4] Add generated managarm bindings
+Date: Thu, 4 Jun 2026 11:13:57 +0200
+Subject: [PATCH 3/5] Add generated managarm bindings
 
 ---
  src/unix/linux_like/managarm/mod.rs | 988 ++++++++++++++++++++++++++++
@@ -10,7 +10,7 @@ Subject: [PATCH 3/4] Add generated managarm bindings
 
 diff --git a/src/unix/linux_like/managarm/mod.rs b/src/unix/linux_like/managarm/mod.rs
 new file mode 100644
-index 000000000..162b1abf3
+index 0000000..162b1ab
 --- /dev/null
 +++ b/src/unix/linux_like/managarm/mod.rs
 @@ -0,0 +1,988 @@
@@ -1003,5 +1003,5 @@ index 000000000..162b1abf3
 +    }
 +}
 -- 
-2.52.0
+2.54.0
 

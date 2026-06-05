@@ -2,8 +2,8 @@ sources:
   - name: rust-libc
     subdir: 'ports'
     git: 'https://github.com/rust-lang/libc.git'
-    tag: '0.2.180'
-    version: '0.2.180'
+    tag: '0.2.183'
+    version: '0.2.183'
 
   - name: rust-num-cpus
     subdir: 'ports'
@@ -38,8 +38,8 @@ sources:
   - name: rust-getrandom-0.3
     subdir: 'ports'
     git: 'https://github.com/rust-random/getrandom.git'
-    tag: 'v0.3.2'
-    version: '0.3.2'
+    tag: 'v0.3.3'
+    version: '0.3.3'
 
   - name: rust-libloading-0.7
     subdir: 'ports'
@@ -111,8 +111,8 @@ sources:
   - name: rust-rustix-0.38
     subdir: 'ports'
     git: 'https://github.com/bytecodealliance/rustix.git'
-    tag: 'v0.38.44'
-    version: '0.38.44'
+    tag: 'v0.38.39'
+    version: '0.38.39'
 
   - name: rust-rustix-1.0
     subdir: 'ports'
